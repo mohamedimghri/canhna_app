@@ -3,6 +3,7 @@ import 'package:canhna_app/views/auth/login_screen.dart';
 import 'package:canhna_app/views/client/edit_profile_screen.dart';
 import 'package:canhna_app/views/client/language_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,6 +15,61 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _isDarkMode = false;
   final AuthService _authService = AuthService();
+  final supabase = Supabase.instance.client;
+
+  String name = '';
+  String email = '';
+  String phone = '';
+  String profilePictureUrl = '';
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) return;
+
+    final userId = user.id;
+    final userEmail = user.email ?? '';
+
+    try {
+      final profileResponse = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', userId)
+          .single();
+
+      final picturePath = profileResponse['image_url'] ?? '';
+      String finalProfilePicUrl = '';
+
+      if (picturePath.isNotEmpty) {
+        try {
+          finalProfilePicUrl = supabase.storage
+              .from('profile-images')
+              .getPublicUrl(picturePath);
+        } catch (e) {
+          print('Error generating profile URL: $e');
+        }
+      }
+
+      setState(() {
+        name = profileResponse['name'] ?? 'Unknown';
+        phone = profileResponse['phone_number'] ?? 'N/A';
+        email = userEmail;
+        profilePictureUrl = finalProfilePicUrl;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading profile: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   void _toggleDarkMode(bool value) {
     setState(() {
@@ -62,64 +118,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         centerTitle: true,
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  SliverList(
-                    delegate: SliverChildListDelegate([
-                      _buildHeader(isDark),
-                      const SizedBox(height: 24),
-                    ]),
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate([
-                        _buildSectionTitle("Account Settings", isDark),
-                        const SizedBox(height: 8),
-                        _buildOption(
-                          icon: Icons.language_outlined,
-                          text: "Language & Region",
-                          isDark: isDark,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LanguageRegionScreen(),
-                            ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SafeArea(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: CustomScrollView(
+                      slivers: [
+                        SliverList(
+                          delegate: SliverChildListDelegate([
+                            _buildHeader(isDark),
+                            const SizedBox(height: 24),
+                          ]),
+                        ),
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          sliver: SliverList(
+                            delegate: SliverChildListDelegate([
+                              _buildSectionTitle("Account Settings", isDark),
+                              const SizedBox(height: 8),
+                              _buildOption(
+                                icon: Icons.language_outlined,
+                                text: "Language & Region",
+                                isDark: isDark,
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LanguageRegionScreen(),
+                                  ),
+                                ),
+                              ),
+                              _buildOption(
+                                icon: Icons.edit_outlined,
+                                text: "Edit Profile",
+                                isDark: isDark,
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const EditProfileScreen(),
+                                  ),
+                                ),
+                              ),
+                              _buildDarkModeSwitch(isDark),
+                              const SizedBox(height: 24),
+                              _buildOption(
+                                icon: Icons.logout_outlined,
+                                text: "Log Out",
+                                isDark: isDark,
+                                color: Colors.red.shade400,
+                                onTap: () => _showLogoutDialog(context),
+                              ),
+                            ]),
                           ),
                         ),
-                        _buildOption(
-                          icon: Icons.edit_outlined,
-                          text: "Edit Profile",
-                          isDark: isDark,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const EditProfileScreen(),
-                            ),
-                          ),
-                        ),
-                        _buildDarkModeSwitch(isDark),
-                        const SizedBox(height: 24),
-                        _buildOption(
-                          icon: Icons.logout_outlined,
-                          text: "Log Out",
-                          isDark: isDark,
-                          color: Colors.red.shade400,
-                          onTap: () => _showLogoutDialog(context),
-                        ),
-                      ]),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -129,44 +187,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: Column(
         children: [
-          Stack(
-            alignment: Alignment.bottomRight,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFF4CAF50),
-                    width: 3,
-                  ),
-                ),
-                child: const CircleAvatar(
-                  radius: 50,
-                  backgroundImage: NetworkImage(
-                    'https://images.unsplash.com/photo-1531123414780-f74242c2b052?auto=format&fit=crop&w=900&q=60',
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[900] : Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF4CAF50),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.edit, color: Colors.white, size: 14),
-                ),
-              ),
-            ],
+          CircleAvatar(
+            radius: 50,
+            backgroundImage: profilePictureUrl.isNotEmpty
+                ? NetworkImage(profilePictureUrl)
+                : const NetworkImage('https://via.placeholder.com/150'),
           ),
           const SizedBox(height: 20),
           Text(
-            'Joy Augustin',
+            name,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
@@ -175,7 +204,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'joy@augustin.com',
+            email,
+            style: TextStyle(
+              fontSize: 15,
+              color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            phone,
             style: TextStyle(
               fontSize: 15,
               color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
@@ -219,16 +256,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Container(
             height: 56,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-            ),
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  color: color ?? (isDark ? Colors.grey[300] : const Color(0xFF4B5563)),
-                  size: 24,
-                ),
+                Icon(icon, color: color ?? (isDark ? Colors.grey[300] : const Color(0xFF4B5563)), size: 24),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
@@ -240,10 +270,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  color: color ?? (isDark ? Colors.grey[500] : const Color(0xFF9CA3AF)),
-                ),
+                Icon(Icons.chevron_right, color: color ?? (isDark ? Colors.grey[500] : const Color(0xFF9CA3AF))),
               ],
             ),
           ),
@@ -271,12 +298,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             isDark ? Icons.dark_mode : Icons.light_mode,
             color: isDark ? Colors.amber : Colors.grey[700],
           ),
-          value: isDark,
+          value: _isDarkMode,
           onChanged: _toggleDarkMode,
           activeColor: const Color(0xFF4CAF50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
         ),
       ),
     );
@@ -290,31 +314,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: isDark ? Colors.grey[900] : Colors.white,
-          title: Text(
-            "Log Out",
-            style: TextStyle(color: isDark ? Colors.white : Colors.black),
-          ),
-          content: Text(
-            "Are you sure you want to log out?",
-            style: TextStyle(color: isDark ? Colors.grey[300] : Colors.grey[700]),
-          ),
+          title: Text("Log Out", style: TextStyle(color: isDark ? Colors.white : Colors.black)),
+          content: Text("Are you sure you want to log out?", style: TextStyle(color: isDark ? Colors.grey[300] : Colors.grey[700])),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(
-                "Cancel",
-                style: TextStyle(color: isDark ? Colors.white : Colors.black),
-              ),
+              child: Text("Cancel", style: TextStyle(color: isDark ? Colors.white : Colors.black)),
             ),
             TextButton(
               onPressed: () async {
                 Navigator.pop(context);
                 await _logout();
               },
-              child: const Text(
-                "Log Out",
-                style: TextStyle(color: Colors.red),
-              ),
+              child: const Text("Log Out", style: TextStyle(color: Colors.red)),
             ),
           ],
         );
