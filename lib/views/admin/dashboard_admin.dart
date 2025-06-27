@@ -37,13 +37,6 @@ class _DashboardAdminState extends State<DashboardAdmin> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "CANHNAdmin",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-          ),
-          backgroundColor: accentColor,
-        ),
         body: screens.elementAt(_selectedIndex),
         bottomNavigationBar: buildBottomNavigationBar(),
       ),
