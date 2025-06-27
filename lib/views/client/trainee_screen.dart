@@ -26,8 +26,9 @@ class _TraineeScreenState extends State<TraineeScreen> {
   final screens = [
     MatchesScreen(),
     HotelsScreen(),
-    PlacesScreen(),
     TransportScreen(),
+    PlacesListScreen(),
+    
     ProfileScreen(),
   ];
   final appBars = [
@@ -42,7 +43,7 @@ class _TraineeScreenState extends State<TraineeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:appBars.elementAt(_selectedIndex),
+     // appBar:appBars.elementAt(_selectedIndex),
       backgroundColor: Colors.white,
       
       bottomNavigationBar: buildBottomNavigationBar(),
