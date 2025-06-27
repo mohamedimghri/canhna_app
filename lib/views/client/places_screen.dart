@@ -205,7 +205,7 @@ class _PlacesListScreenState extends State<PlacesListScreen>
   }
 
   Widget _buildLoadingState(Color primaryColor) {
-    return Container(
+    return SizedBox(
       height: 300,
       child: Center(
         child: Column(
@@ -480,7 +480,7 @@ class _AnimatedPlaceCardState extends State<AnimatedPlaceCard>
   Widget _buildImageSection() {
     return Hero(
       tag: 'place-${widget.place.id}',
-      child: Container(
+      child: SizedBox(
         height: 220,
         width: double.infinity,
         child: Stack(

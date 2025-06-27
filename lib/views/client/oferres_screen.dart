@@ -1,9 +1,9 @@
 import 'package:canhna_app/models/Offre.dart';
 import 'package:canhna_app/services/auth/auth_gate.dart';
+import 'package:canhna_app/services/stripe_service.dart';
 import 'package:canhna_app/views/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'trainee_screen.dart';
 
 class OffresScreen extends StatefulWidget {
   const OffresScreen({super.key});
@@ -72,7 +72,6 @@ class _OffresScreenState extends State<OffresScreen>
     final response = await supabase.from('offres').select();
     return (response as List).map((e) => Offre.fromJson(e)).toList();
   }
-
   Future<void> handlePurchase(Offre offre) async {
     final userId = Supabase.instance.client.auth.currentUser?.id;
     if (userId == null) {
@@ -83,7 +82,7 @@ class _OffresScreenState extends State<OffresScreen>
       return;
     }
 
-    // Show loading animation
+    // Afficher loading
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -105,17 +104,29 @@ class _OffresScreenState extends State<OffresScreen>
     );
 
     try {
+      // 🟢 Étape 1 : Lancer le paiement Stripe
+      final paymentSuccess = await StripeService.instance.makePayment(amount: offre.prix);
+
+      if (!paymentSuccess) {
+        if (mounted) {
+          Navigator.pop(context);
+          _showAnimatedSnackBar("Le paiement a échoué ou a été annulé.", isError: true);
+        }
+        return;
+      }
+
+      // 🟢 Étape 2 : Insérer dans purchases seulement si le paiement a réussi
       await Supabase.instance.client.from('purchases').insert({
         'user_id': userId,
         'offre_id': offre.id,
       });
 
       if (!mounted) return;
-      Navigator.pop(context); // Close loading dialog
+      Navigator.pop(context); // Fermer le loading
 
-      _showAnimatedSnackBar(" Offre achetée avec succès !");
+      _showAnimatedSnackBar("✅ Offre achetée avec succès !");
 
-      // Rediriger vers TraineeScreen avec droits dynamiques après l'achat
+      // 🟢 Étape 3 : Rediriger avec animation vers AuthGate après délai
       await Future.delayed(const Duration(milliseconds: 1500));
       if (mounted) {
         Navigator.pushReplacement(
@@ -139,7 +150,7 @@ class _OffresScreenState extends State<OffresScreen>
       }
     } catch (e) {
       if (mounted) {
-        Navigator.pop(context); // Close loading dialog
+        Navigator.pop(context); // Fermer le loading
         _showAnimatedSnackBar("Erreur lors de l'achat : $e", isError: true);
       }
     }

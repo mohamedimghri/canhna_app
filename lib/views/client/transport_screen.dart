@@ -158,7 +158,7 @@ class _TransportScreenState extends State<TransportScreen>
   }
 
   Widget _buildLoadingState() {
-    return Container(
+    return SizedBox(
       height: 400,
       child: Center(
         child: Column(
@@ -302,7 +302,7 @@ class _AnimatedTransportCardState extends State<AnimatedTransportCard>
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
   late Animation<double> _hoverAnimation;
-  bool _isHovered = false;
+  final bool _isHovered = false;
 
   @override
   void initState() {
@@ -426,7 +426,7 @@ class _AnimatedTransportCardState extends State<AnimatedTransportCard>
   Widget _buildImageSection() {
     return Hero(
       tag: 'transport-${widget.transport.id}',
-      child: Container(
+      child: SizedBox(
         height: 200,
         width: double.infinity,
         child: Stack(

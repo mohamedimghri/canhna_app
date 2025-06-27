@@ -107,23 +107,23 @@ class _TraineeScreenState extends State<TraineeScreen> {
       currentIndex: _selectedIndex,
       items: [
         BottomNavigationBarItem(
-          icon: SvgPicture.asset('icons/match.svg', width: 30, height: 30),
+          icon: SvgPicture.asset('assets/icons/match.svg', width: 30, height: 30),
           label: 'Matchs',
         ),
         BottomNavigationBarItem(
-          icon: SvgPicture.asset('icons/hotels.svg', width: 30, height: 30),
+          icon: SvgPicture.asset('assets/icons/hotels.svg', width: 30, height: 30),
           label: 'Hotels',
         ),
         BottomNavigationBarItem(
-          icon: SvgPicture.asset('icons/bus.svg', width: 30, height: 30),
+          icon: SvgPicture.asset('assets/icons/bus.svg', width: 30, height: 30),
           label: 'Transports',
         ),
         BottomNavigationBarItem(
-          icon: SvgPicture.asset('icons/location.svg', width: 30, height: 30),
+          icon: SvgPicture.asset('assets/icons/location.svg', width: 30, height: 30),
           label: 'Places',
         ),
         BottomNavigationBarItem(
-          icon: SvgPicture.asset('icons/profile.svg', width: 30, height: 30),
+          icon: SvgPicture.asset('assets/icons/profile.svg', width: 30, height: 30),
           label: 'Profil',
         ),
       ],

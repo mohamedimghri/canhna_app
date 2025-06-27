@@ -490,7 +490,7 @@ class _AnimatedHotelCardState extends State<AnimatedHotelCard>
                             children: [
                               Hero(
                                 tag: 'hotel_${widget.hotel.id}',
-                                child: Container(
+                                child: SizedBox(
                                   height: 200,
                                   width: double.infinity,
                                   child: widget.hotel.imageUrl != null
@@ -728,7 +728,7 @@ class HotelDetailsSheet extends StatelessWidget {
                     tag: 'hotel_${hotel.id}',
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(15),
-                      child: Container(
+                      child: SizedBox(
                         height: 200,
                         width: double.infinity,
                         child: hotel.imageUrl != null
