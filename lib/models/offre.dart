@@ -22,20 +22,19 @@ class Offre {
   });
 
   factory Offre.fromJson(Map<String, dynamic> json) => Offre(
-        id: json['id'],
-        titre: json['titre'],
-        description: json['description'],
-        prix: (json['prix'] as num).toDouble(),
-        imageUrl: json['image_url'],
-        match: json['match'] ?? false,
-        hotel: json['hotel'] ?? false,
-        transport: json['transport'] ?? false,
-        place: json['place'] ?? false,
-      );
+    id: json['id'],
+    titre: json['titre'],
+    description: json['description'],
+    prix: (json['prix'] as num).toDouble(),
+    imageUrl: json['image_url'],
+    match: json['match'] ?? false,
+    hotel: json['hotel'] ?? false,
+    transport: json['transport'] ?? false,
+    place: json['place'] ?? false,
+  );
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'titre': titre,
       'description': description,
       'image_url': imageUrl,
