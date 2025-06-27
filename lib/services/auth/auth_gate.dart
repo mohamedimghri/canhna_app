@@ -1,5 +1,7 @@
 import 'package:canhna_app/views/admin/dashboard_admin.dart';
-import 'package:canhna_app/views/auth/Login_screen.dart';
+import 'package:canhna_app/views/auth/login_screen.dart';
+import 'package:canhna_app/views/client/oferres_screen.dart';
+
 import 'package:canhna_app/views/client/trainee_screen.dart';
 import 'package:canhna_app/views/guide/dashboard_guide.dart';
 import 'package:flutter/material.dart';
@@ -7,27 +9,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
-
-  Future<String?> fetchUserRole(String userId) async {
-    final response =
-        await Supabase.instance.client
-            .from('profiles')
-            .select('role')
-            .eq('id', userId)
-            .single();
-
-    return response['role'];
-  }
-
-  // Future<bool> getCurrentUserActive(String userId) async {
-  //   final response =
-  //       await Supabase.instance.client
-  //           .from('profiles')
-  //           .select('is_active')
-  //           .eq('id', userId)
-  //           .single();
-  //   return response['is_active'];
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +26,6 @@ class AuthGate extends StatelessWidget {
         if (session != null) {
           final userId = session.user.id;
 
-          // On attend à la fois le rôle et l'état actif
           return FutureBuilder<Map<String, dynamic>>(
             future: _getRoleAndStatus(userId),
             builder: (context, resultSnapshot) {
@@ -57,7 +37,7 @@ class AuthGate extends StatelessWidget {
 
               final data = resultSnapshot.data;
               if (data == null) {
-                return const LoginScreen(); // fallback en cas d'erreur
+                return const LoginScreen();
               }
 
               final role = data['role'] as String?;
@@ -80,10 +60,10 @@ class AuthGate extends StatelessWidget {
                           ElevatedButton.icon(
                             onPressed: () async {
                               await Supabase.instance.client.auth.signOut();
-                              Navigator.push(
+                              Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => LoginScreen(),
+                                  builder: (context) => const LoginScreen(),
                                 ),
                               );
                             },
@@ -104,30 +84,92 @@ class AuthGate extends StatelessWidget {
               if (role == 'admin') {
                 return const DashboardAdmin();
               } else if (role == 'client') {
-                return const TraineeScreen();
+                return FutureBuilder<Map<String, dynamic>>(
+                  future: getUserAccessRights(userId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Scaffold(
+                        body: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+
+                    final rights = snapshot.data ?? {
+                      'match': false,
+                      'hotel': false,
+                      'transport': false,
+                      'place': false,
+                      'hasAnyOffer': false,
+                    };
+
+                    if (!rights['hasAnyOffer']) {
+                      return const OffresScreen();
+                    }
+
+                    return TraineeScreen(
+                      unlockedMatch: rights['match']!,
+                      unlockedHotel: rights['hotel']!,
+                      unlockedTransport: rights['transport']!,
+                      unlockedPlace: rights['place']!,
+                    );
+                  },
+                );
               } else if (role == 'guide') {
                 return const DashboardGuide();
               } else {
-                return const LoginScreen(); // rôle inconnu
+                return const LoginScreen();
               }
             },
           );
         }
 
-        return const LoginScreen(); // pas connecté
+        return const LoginScreen();
       },
     );
   }
 
-  /// Combine le rôle + état actif
+  /// Récupère le rôle et le statut actif de l'utilisateur
   Future<Map<String, dynamic>> _getRoleAndStatus(String userId) async {
-    final response =
-        await Supabase.instance.client
-            .from('profiles')
-            .select('role, is_active')
-            .eq('id', userId)
-            .single();
+    final response = await Supabase.instance.client
+        .from('profiles')
+        .select('role, is_active')
+        .eq('id', userId)
+        .single();
 
-    return {'role': response['role'], 'is_active': response['is_active']};
+    return {
+      'role': response['role'],
+      'is_active': response['is_active'],
+    };
+  }
+
+  /// Récupère les droits d'accès selon les achats de l'utilisateur
+  Future<Map<String, dynamic>> getUserAccessRights(String userId) async {
+    final response = await Supabase.instance.client
+        .from('purchases')
+        .select('offres(match, hotel, transport, place)')
+        .eq('user_id', userId);
+
+    bool unlockedMatch = false;
+    bool unlockedHotel = false;
+    bool unlockedTransport = false;
+    bool unlockedPlace = false;
+
+    for (final purchase in response as List) {
+      final offre = purchase['offres'];
+      if (offre['match'] == true) unlockedMatch = true;
+      if (offre['hotel'] == true) unlockedHotel = true;
+      if (offre['transport'] == true) unlockedTransport = true;
+      if (offre['place'] == true) unlockedPlace = true;
+    }
+
+    final hasAnyOffer =
+        unlockedMatch || unlockedHotel || unlockedTransport || unlockedPlace;
+
+    return {
+      'match': unlockedMatch,
+      'hotel': unlockedHotel,
+      'transport': unlockedTransport,
+      'place': unlockedPlace,
+      'hasAnyOffer': hasAnyOffer,
+    };
   }
 }
