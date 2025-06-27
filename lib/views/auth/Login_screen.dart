@@ -231,8 +231,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                 child: SlideTransition(
                                   position: _logoSlide,
                                   child: SvgPicture.asset(
-                                    'assets/images/3.svg',
-                                    height: 150,
+                                    'images/logo.svg',
+                                    height: 200,
                                   ),
                                 ),
                               ),

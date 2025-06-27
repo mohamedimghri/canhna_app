@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -257,8 +257,8 @@ if (_formKey.currentState!.validate()) {
                                   child: SlideTransition(
                                     position: _logoSlide,
                                     child: SvgPicture.asset(
-                                      'assets/images/3.svg',
-                                      height: 120,
+                                      'images/logo.svg',
+                                      height: 200,
                                     ),
                                   ),
                                 ),
@@ -431,7 +431,7 @@ if (_formKey.currentState!.validate()) {
                                 ),
                                 const SizedBox(height: 25),
                                 // Bouton d'inscription amélioré
-                                Container(
+                                SizedBox(
                                   width: double.infinity,
                                   height: 55,
                                   child: ElevatedButton(

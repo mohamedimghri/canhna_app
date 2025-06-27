@@ -1,6 +1,7 @@
 import 'package:canhna_app/views/admin/dashboard_admin.dart';
 import 'package:canhna_app/views/auth/Login_screen.dart';
-import 'package:canhna_app/views/client/dashboard_client.dart';
+import 'package:canhna_app/views/client/trainee_screen.dart';
+import 'package:canhna_app/views/guide/dashboard_guide.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -103,9 +104,9 @@ class AuthGate extends StatelessWidget {
               if (role == 'admin') {
                 return const DashboardAdmin();
               } else if (role == 'client') {
-                return const DashboardClient();
+                return const TraineeScreen();
               } else if (role == 'guide') {
-                return const DashboardClient();
+                return const DashboardGuide();
               } else {
                 return const LoginScreen(); // rôle inconnu
               }

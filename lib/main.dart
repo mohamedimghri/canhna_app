@@ -1,5 +1,4 @@
 import 'package:canhna_app/services/auth/auth_gate.dart';
-import 'package:canhna_app/views/auth/Login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -20,6 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(fontFamily: 'Poppins'),
       home: AuthGate(),
     );
   }
