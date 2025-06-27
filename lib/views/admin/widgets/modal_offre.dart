@@ -22,12 +22,31 @@ class _ModalOffreState extends State<ModalOffre> {
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   File? _image;
+  String? _existingImageUrl;
   bool _hasMatch = false;
   bool _hasHotel = false;
   bool _hasTransport = false;
   bool _hasPlace = false;
   bool _isLoading = false;
-
+  bool _isEditMode = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Initialize form with existing offer data if in edit mode
+    if (widget.existingOffre != null) {
+      _isEditMode = true;
+      _titleController.text = widget.existingOffre!.titre;
+      _descriptionController.text = widget.existingOffre!.description ?? '';
+      _priceController.text = widget.existingOffre!.prix.toString();
+      _existingImageUrl = widget.existingOffre!.imageUrl;
+      _hasMatch = widget.existingOffre!.match;
+      _hasHotel = widget.existingOffre!.hotel;
+      _hasTransport = widget.existingOffre!.transport;
+      _hasPlace = widget.existingOffre!.place;
+    }
+  }
+  
   // Form field decorations
   InputDecoration _getInputDecoration(String label, IconData icon) {
     return InputDecoration(
@@ -101,62 +120,106 @@ class _ModalOffreState extends State<ModalOffre> {
         border: Border.all(color: primaryColor.withOpacity(0.5)),
         borderRadius: BorderRadius.circular(12),
       ),
-      child:
-          _image != null
-              ? Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.file(
-                      _image!,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => setState(() => _image = null),
-                      color: Colors.white,
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.black54,
-                        padding: const EdgeInsets.all(8),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-              : InkWell(
-                onTap: _pickImage,
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add_photo_alternate_outlined,
-                        size: 48,
-                        color: primaryColor,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Click to upload',
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+      child: _image != null
+          ? Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    _image!,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
                   ),
                 ),
-              ),
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => setState(() => _image = null),
+                    color: Colors.white,
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black54,
+                      padding: const EdgeInsets.all(8),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : _existingImageUrl != null && _existingImageUrl!.isNotEmpty
+              ? Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        _existingImageUrl!,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) => Center(
+                          child: Icon(
+                            Icons.broken_image_outlined,
+                            size: 48,
+                            color: Colors.grey[400],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => setState(() => _existingImageUrl = null),
+                        color: Colors.white,
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.black54,
+                          padding: const EdgeInsets.all(8),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : InkWell(
+                  onTap: _pickImage,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add_photo_alternate_outlined,
+                          size: 48,
+                          color: primaryColor,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Click to upload',
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
     );
   }
 
@@ -225,7 +288,7 @@ class _ModalOffreState extends State<ModalOffre> {
 
   Future<void> _saveOffer() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_image == null) {
+    if (_image == null && _existingImageUrl == null) {
       _showFlushbar(
         'Please select an image for the offer',
         Colors.orange,
@@ -238,9 +301,14 @@ class _ModalOffreState extends State<ModalOffre> {
 
     try {
       final supabase = Supabase.instance.client;
-      final imageUrl = await _uploadImage();
+      String imageUrl = _existingImageUrl ?? '';
+      
+      // Upload new image if selected
+      if (_image != null) {
+        imageUrl = await _uploadImage();
+      }
 
-      // Create offer data without ID
+      // Create offer data
       final offerData = {
         'titre': _titleController.text,
         'description': _descriptionController.text,
@@ -252,16 +320,37 @@ class _ModalOffreState extends State<ModalOffre> {
         'place': _hasPlace,
       };
 
-      await supabase.from('offres').insert(offerData);
-
-      if (mounted) {
-        Navigator.of(context).pop();
-        _showFlushbar(
-          'Offer created successfully!',
-          Colors.green,
-          Icons.check_circle,
-        );
+      if (_isEditMode) {
+        // Update existing offer
+        await supabase
+            .from('offres')
+            .update(offerData)
+            .eq('id', widget.existingOffre!.id);
+            
+        if (mounted) {
+          Navigator.of(context).pop();
+          _showFlushbar(
+            'Offer updated successfully!',
+            Colors.green,
+            Icons.check_circle,
+          );
+        }
+      } else {
+        // Create new offer
+        await supabase.from('offres').insert(offerData);
+        
+        if (mounted) {
+          Navigator.of(context).pop();
+          _showFlushbar(
+            'Offer created successfully!',
+            Colors.green,
+            Icons.check_circle,
+          );
+        }
       }
+      
+      // Call the callback to refresh the offers list
+      widget.onOfferSaved?.call();
     } catch (e) {
       if (mounted) {
         _showFlushbar(
@@ -401,20 +490,20 @@ class _ModalOffreState extends State<ModalOffre> {
                   ),
                 ),
                 onPressed: _isLoading ? null : _saveOffer,
-                child:
-                    _isLoading
-                        ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                        : const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Text('Save Offer'),
+                // In the build method, update the button text
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
                         ),
+                      )
+                    : Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Text(_isEditMode ? 'Update Offer' : 'Save Offer'),
+                      ),
               ),
             ],
           ),
