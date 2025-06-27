@@ -26,8 +26,8 @@ class _TraineeScreenState extends State<TraineeScreen> {
   final screens = [
     MatchesScreen(),
     HotelsScreen(),
-    PlacesScreen(),
     TransportScreen(),
+    PlacesScreen(),
     ProfileScreen(),
   ];
   final appBars = [
