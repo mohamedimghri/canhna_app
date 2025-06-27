@@ -257,7 +257,7 @@ if (_formKey.currentState!.validate()) {
                                   child: SlideTransition(
                                     position: _logoSlide,
                                     child: SvgPicture.asset(
-                                      'assets/images/3.svg',
+                                      'assets/images/logo.svg',
                                       height: 120,
                                     ),
                                   ),
