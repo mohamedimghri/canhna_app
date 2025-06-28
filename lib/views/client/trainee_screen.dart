@@ -1,3 +1,4 @@
+import 'package:canhna_app/views/client/guide_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'matches_screen.dart';
@@ -81,6 +82,7 @@ class _TraineeScreenState extends State<TraineeScreen> {
       unlockedHotel ? const HotelsScreen() : const LockedScreen(type: "Hotels"),
       unlockedTransport ? const TransportScreen() : const LockedScreen(type: "Transports"),
       unlockedPlace ? const PlacesListScreen() : const LockedScreen(type: "Places"),
+      const GuideScreen(),
       const ProfileScreen(),
     ];
 
@@ -121,6 +123,10 @@ class _TraineeScreenState extends State<TraineeScreen> {
         BottomNavigationBarItem(
           icon: SvgPicture.asset('assets/icons/location.svg', width: 30, height: 30),
           label: 'Places',
+        ),
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset('assets/icons/guide.svg', width: 30, height: 30),
+          label: 'Guide',
         ),
         BottomNavigationBarItem(
           icon: SvgPicture.asset('assets/icons/profile.svg', width: 30, height: 30),
