@@ -35,8 +35,8 @@ class AuthService {
         await _supabase.from('profiles').insert({
           'id': user.id,
           'name': name,
-          'phone_number' : telefone,
           'role': role,
+          'phone_number' : telefone,
           'is_active': true
         });
       } catch (e) {
