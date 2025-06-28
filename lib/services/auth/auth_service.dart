@@ -19,7 +19,7 @@ class AuthService {
     String email,
     String password,
     String name,
-    String role,
+    String role, String s,
   ) async {
     final response = await _supabase.auth.signUp(
       email: email,
