@@ -1,6 +1,7 @@
 import 'package:canhna_app/models/Offre.dart';
 import 'package:canhna_app/services/auth/auth_gate.dart';
 import 'package:canhna_app/services/stripe_service.dart';
+import 'package:canhna_app/views/client/personaliseOffre.dart';
 import 'package:canhna_app/views/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -25,34 +26,29 @@ class _OffresScreenState extends State<OffresScreen>
   void initState() {
     super.initState();
     _offresFuture = fetchOffres();
-    
+
     // Initialize animation controllers
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _fabAnimationController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
 
     // Initialize animations
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutQuart,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuart),
+    );
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.5),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
 
     // Start animations
     _animationController.forward();
@@ -72,6 +68,7 @@ class _OffresScreenState extends State<OffresScreen>
     final response = await supabase.from('offres').select();
     return (response as List).map((e) => Offre.fromJson(e)).toList();
   }
+
   Future<void> handlePurchase(Offre offre) async {
     final userId = Supabase.instance.client.auth.currentUser?.id;
     if (userId == null) {
@@ -86,31 +83,37 @@ class _OffresScreenState extends State<OffresScreen>
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
-        child: Card(
-          child: Padding(
-            padding: EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text("Traitement de votre achat..."),
-              ],
+      builder:
+          (context) => const Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text("Traitement de votre achat..."),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
     );
 
     try {
       // 🟢 Étape 1 : Lancer le paiement Stripe
-      final paymentSuccess = await StripeService.instance.makePayment(amount: offre.prix);
+      final paymentSuccess = await StripeService.instance.makePayment(
+        amount: offre.prix,
+      );
 
       if (!paymentSuccess) {
         if (mounted) {
           Navigator.pop(context);
-          _showAnimatedSnackBar("Le paiement a échoué ou a été annulé.", isError: true);
+          _showAnimatedSnackBar(
+            "Le paiement a échoué ou a été annulé.",
+            isError: true,
+          );
         }
         return;
       }
@@ -132,16 +135,24 @@ class _OffresScreenState extends State<OffresScreen>
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const AuthGate(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            pageBuilder:
+                (context, animation, secondaryAnimation) => const AuthGate(),
+            transitionsBuilder: (
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            ) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1.0, 0.0),
                   end: Offset.zero,
-                ).animate(CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeInOutCubic,
-                )),
+                ).animate(
+                  CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeInOutCubic,
+                  ),
+                ),
                 child: child,
               );
             },
@@ -169,9 +180,7 @@ class _OffresScreenState extends State<OffresScreen>
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: isError 
-            ? Colors.red.shade600 
-            : Colors.green.shade600,
+        backgroundColor: isError ? Colors.red.shade600 : Colors.green.shade600,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
@@ -182,14 +191,12 @@ class _OffresScreenState extends State<OffresScreen>
 
   @override
   Widget build(BuildContext context) {
-    
-    
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text(
           'Offres Disponibles',
-          style: TextStyle(fontWeight: FontWeight.w600,color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         ),
         backgroundColor: primaryColor,
         elevation: 0,
@@ -198,10 +205,7 @@ class _OffresScreenState extends State<OffresScreen>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                primaryColor,
-                primaryColor.withOpacity(0.8),
-              ],
+              colors: [primaryColor, primaryColor.withOpacity(0.8)],
             ),
           ),
         ),
@@ -211,10 +215,7 @@ class _OffresScreenState extends State<OffresScreen>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              primaryColor.withOpacity(0.1),
-              Colors.white,
-            ],
+            colors: [primaryColor.withOpacity(0.1), Colors.white],
             stops: const [0.0, 0.3],
           ),
         ),
@@ -312,7 +313,9 @@ class _OffresScreenState extends State<OffresScreen>
                         itemCount: offres.length,
                         itemBuilder: (context, index) {
                           return AnimatedContainer(
-                            duration: Duration(milliseconds: 600 + (index * 100)),
+                            duration: Duration(
+                              milliseconds: 600 + (index * 100),
+                            ),
                             curve: Curves.easeOutQuart,
                             child: _buildOffreCard(offres[index], index),
                           );
@@ -328,15 +331,41 @@ class _OffresScreenState extends State<OffresScreen>
       ),
       floatingActionButton: ScaleTransition(
         scale: _fabAnimationController,
-        child: FloatingActionButton.extended(
-          onPressed: () {
-            setState(() {
-              _offresFuture = fetchOffres();
-            });
-          },
-          icon: const Icon(Icons.refresh),
-          label: const Text('Actualiser', style: TextStyle(color: Colors.white),),
-          backgroundColor: primaryColor,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            FloatingActionButton.extended(
+              heroTag: "refreshBtn",
+              onPressed: () {
+                setState(() {
+                  _offresFuture = fetchOffres();
+                });
+              },
+              icon: const Icon(Icons.refresh, color: Colors.white),
+              label: const Text(
+                'Actualiser',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: primaryColor,
+            ),
+            const SizedBox(height: 12),
+            FloatingActionButton.extended(
+              heroTag: "addBtn",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ModalOffre()),
+                );
+              },
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text(
+                'Personalise offre',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: accentColor,
+            ),
+          ],
         ),
       ),
     );
@@ -344,7 +373,7 @@ class _OffresScreenState extends State<OffresScreen>
 
   Widget _buildOffreCard(Offre offre, int index) {
     final theme = Theme.of(context);
-    
+
     return TweenAnimationBuilder<double>(
       duration: Duration(milliseconds: 800 + (index * 200)),
       tween: Tween(begin: 0.0, end: 1.0),
@@ -406,8 +435,13 @@ class _OffresScreenState extends State<OffresScreen>
                                     Image.network(
                                       offre.imageUrl!,
                                       fit: BoxFit.cover,
-                                      loadingBuilder: (context, child, loadingProgress) {
-                                        if (loadingProgress == null) return child;
+                                      loadingBuilder: (
+                                        context,
+                                        child,
+                                        loadingProgress,
+                                      ) {
+                                        if (loadingProgress == null)
+                                          return child;
                                         return Container(
                                           color: Colors.grey.shade200,
                                           child: const Center(
@@ -415,7 +449,11 @@ class _OffresScreenState extends State<OffresScreen>
                                           ),
                                         );
                                       },
-                                      errorBuilder: (context, error, stackTrace) {
+                                      errorBuilder: (
+                                        context,
+                                        error,
+                                        stackTrace,
+                                      ) {
                                         return Container(
                                           color: Colors.grey.shade200,
                                           child: const Icon(
@@ -475,7 +513,9 @@ class _OffresScreenState extends State<OffresScreen>
                                         borderRadius: BorderRadius.circular(20),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.green.withOpacity(0.3),
+                                            color: Colors.green.withOpacity(
+                                              0.3,
+                                            ),
                                             blurRadius: 8,
                                             offset: const Offset(0, 2),
                                           ),
@@ -513,13 +553,15 @@ class _OffresScreenState extends State<OffresScreen>
                                       backgroundColor: primaryColor,
                                       foregroundColor: Colors.white,
                                       elevation: 6,
-                                      shadowColor: theme.primaryColor.withOpacity(0.4),
+                                      shadowColor: theme.primaryColor
+                                          .withOpacity(0.4),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(25),
                                       ),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(
                                           Icons.shopping_cart_checkout_rounded,
