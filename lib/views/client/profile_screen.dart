@@ -29,47 +29,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
-  final user = supabase.auth.currentUser;
-  if (user == null) return;
+    final user = supabase.auth.currentUser;
+    if (user == null) return;
 
-  final userId = user.id;
-  final userEmail = user.email ?? '';
+    final userId = user.id;
+    final userEmail = user.email ?? '';
 
-  try {
-    final profileResponse = await supabase
-        .from('profiles')
-        .select()
-        .eq('id', userId)
-        .single();
+    try {
+      final profileResponse = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', userId)
+          .single();
 
-    final picturePath = profileResponse['image_url'] ?? '';
-    String finalProfilePicUrl = '';
+      final picturePath = profileResponse['image_url'] ?? '';
+      String finalProfilePicUrl = '';
 
-    if (picturePath.isNotEmpty) {
-      try {
-        finalProfilePicUrl = supabase.storage
-            .from('profile-images')
-            .getPublicUrl(picturePath);
-      } catch (e) {
-        print('Error generating profile URL: $e');
+      if (picturePath.isNotEmpty) {
+        try {
+          finalProfilePicUrl = supabase.storage
+              .from('profile-images')
+              .getPublicUrl(picturePath);
+        } catch (e) {
+          print('Error generating profile URL: $e');
+        }
       }
-    }
 
-    setState(() {
-      name = profileResponse['name'] ?? 'Unknown';
-      phone = profileResponse['phone_number'] ?? 'N/A';
-      email = userEmail;
-      profilePictureUrl = finalProfilePicUrl;
-      role = profileResponse['role'] ?? 'Client'; // Add this line
-      isLoading = false;
-    });
-  } catch (e) {
-    print('Error loading profile: $e');
-    setState(() {
-      isLoading = false;
-    });
+      setState(() {
+        name = profileResponse['name'] ?? 'Unknown';
+        phone = profileResponse['phone_number'] ?? 'N/A';
+        email = userEmail;
+        profilePictureUrl = finalProfilePicUrl;
+        role = profileResponse['role'] ?? 'Client';
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading profile: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
-}
 
   Future<void> _logout() async {
     await _authService.signOut();
@@ -83,79 +83,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFD),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: Colors.black,
-            size: 24,
-          ),
-          onPressed: () => Navigator.of(context).pop(),
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.white,
+    appBar: AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      title: const Text(
+        'Profile',
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
         ),
-        title: const Text(
-          'Profile',
-          style: TextStyle(
-            color: Color(0xFF1A1A1A),
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        centerTitle: true,
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SafeArea(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: CustomScrollView(
-                      slivers: [
-                        SliverList(
-                          delegate: SliverChildListDelegate([
-                            _buildHeader(),
-                            const SizedBox(height: 24),
-                          ]),
-                        ),
-                        SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          sliver: SliverList(
-                            delegate: SliverChildListDelegate([
-                              _buildSectionTitle("Account Settings"),
-                              const SizedBox(height: 8),
-                              _buildOption(
-                                icon: Icons.edit_outlined,
-                                text: "Edit Profile",
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const EditProfileScreen(),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              _buildOption(
-                                icon: Icons.logout_outlined,
-                                text: "Log Out",
-                                color: Colors.red.shade400,
-                                onTap: () => _showLogoutDialog(context),
-                              ),
-                            ]),
-                          ),
-                        ),
-                      ],
+      centerTitle: true,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        onPressed: () => Navigator.pop(context),
+      ),
+      iconTheme: const IconThemeData(color: Colors.black),
+    ),
+    body: isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : Column(
+            children: [
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverList(
+                      delegate: SliverChildListDelegate([
+                        _buildHeader(),
+                        const SizedBox(height: 24),
+                      ]),
                     ),
-                  ),
-                ],
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate([
+                          _buildSectionTitle("Account Settings"),
+                          const SizedBox(height: 8),
+                          _buildOption(
+                            icon: Icons.edit_outlined,
+                            text: "Edit Profile",
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const EditProfileScreen(),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          _buildOption(
+                            icon: Icons.logout_outlined,
+                            text: "Log Out",
+                            color: Colors.red.shade400,
+                            onTap: () => _showLogoutDialog(context),
+                          ),
+                        ]),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-    );
-  }
+            ],
+          ),
+  );
+}
 
   Widget _buildHeader() {
   return Container(

@@ -1,4 +1,3 @@
-
 import 'package:canhna_app/views/client/hotels_screen.dart';
 import 'package:canhna_app/views/client/matches_screen.dart';
 import 'package:canhna_app/views/client/places_screen.dart';
@@ -23,64 +22,94 @@ class _TraineeScreenState extends State<TraineeScreen> {
     });
   }
 
-  final screens = [
-    MatchesScreen(),
-    HotelsScreen(),
-    TransportScreen(),
-    PlacesScreen(),
-    ProfileScreen(),
-  ];
-  final appBars = [
-    AppBar(),
-     AppBar(),
-      AppBar(),
-       AppBar(),
-        AppBar(),
-   
+  final List<Widget> screens = [
+    const MatchesScreen(),
+    const HotelsScreen(),
+    const TransportScreen(),
+    const PlacesScreen(),
+    const ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:appBars.elementAt(_selectedIndex),
       backgroundColor: Colors.white,
-      
-      bottomNavigationBar: buildBottomNavigationBar(),
       body: screens.elementAt(_selectedIndex),
+      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-  BottomNavigationBar buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      onTap: _navigateBottomBar,
-      backgroundColor: Colors.white,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: primaryColor,
-      selectedIconTheme: IconThemeData(color: primaryColor),
-      elevation: 0.0,
-      currentIndex: _selectedIndex,
-      items: [
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset('icons/match.svg', width: 30, height: 30),
-          label: 'Matchs',
+  Widget _buildBottomNavigationBar() {
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, -2),
+          )
+        ],
+      ),
+      child: BottomNavigationBar(
+        onTap: _navigateBottomBar,
+        backgroundColor: Colors.white,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: primaryColor,
+        unselectedItemColor: Colors.grey,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
+        selectedIconTheme: const IconThemeData(size: 28),
+        unselectedIconTheme: const IconThemeData(size: 26),
+        elevation: 0,
+        currentIndex: _selectedIndex,
+        items: [
+          _buildBottomNavItem(
+            iconPath: 'assets/icons/match.svg',
+            label: 'Matches',
+            isSelected: _selectedIndex == 0,
+          ),
+          _buildBottomNavItem(
+            iconPath: 'assets/icons/hotels.svg',
+            label: 'Hotels',
+            isSelected: _selectedIndex == 1,
+          ),
+          _buildBottomNavItem(
+            iconPath: 'assets/icons/bus.svg',
+            label: 'Transport',
+            isSelected: _selectedIndex == 2,
+          ),
+          _buildBottomNavItem(
+            iconPath: 'assets/icons/location.svg',
+            label: 'Places',
+            isSelected: _selectedIndex == 3,
+          ),
+          _buildBottomNavItem(
+            iconPath: 'assets/icons/profile.svg',
+            label: 'Profile',
+            isSelected: _selectedIndex == 4,
+          ),
+        ],
+      ),
+    );
+  }
+
+  BottomNavigationBarItem _buildBottomNavItem({
+    required String iconPath,
+    required String label,
+    required bool isSelected,
+  }) {
+    return BottomNavigationBarItem(
+      icon: Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: SvgPicture.asset(
+          iconPath,
+          width: 24,
+          height: 24,
+          color: isSelected ? primaryColor : Colors.grey,
         ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset('icons/hotels.svg', width: 30, height: 30),
-          label: 'Hotels',
-        ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset('icons/bus.svg', width: 30, height: 30),
-          label: 'Transports',
-        ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset('icons/location.svg', width: 30, height: 30),
-          label: 'Places',
-        ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset('icons/profile.svg', width: 30, height: 30),
-          label: 'Profile',
-        ),
-      ],
+      ),
+      label: label,
     );
   }
 }
