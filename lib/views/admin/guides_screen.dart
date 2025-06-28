@@ -695,15 +695,16 @@ class _GuidesScreenState extends State<GuidesScreen> {
 
   Widget _buildGuideCard(Profile guide) {
     return Card(
-      elevation: 2,
+      elevation: 10,
       margin: const EdgeInsets.symmetric(
         horizontal: spacingM,
         vertical: spacingS,
       ),
+      color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(radiusM),
       ),
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Colors.black.withAlpha(90),
       child: Padding(
         padding: const EdgeInsets.all(spacingM),
         child: Column(
