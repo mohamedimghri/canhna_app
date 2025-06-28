@@ -4,6 +4,7 @@ import 'package:canhna_app/views/client/edit_profile.dart';
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -297,4 +298,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
     );
   }
+
+ 
 }
