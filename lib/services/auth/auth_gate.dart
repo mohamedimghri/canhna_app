@@ -5,6 +5,7 @@ import 'package:canhna_app/views/client/oferres_screen.dart';
 
 import 'package:canhna_app/views/client/trainee_screen.dart';
 import 'package:canhna_app/views/guide/dashboard_guide.dart';
+import 'package:canhna_app/views/guide/guide_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -115,7 +116,7 @@ class AuthGate extends StatelessWidget {
                   },
                 );
               } else if (role == 'guide') {
-                return const DashboardGuide();
+                return const GuideScreen();
               } else {
                 return const LoginScreen();
               }
