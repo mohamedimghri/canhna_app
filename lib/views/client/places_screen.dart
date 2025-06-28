@@ -140,42 +140,42 @@ class _PlacesListScreenState extends State<PlacesListScreen>
             ),
             
             // Search Bar
-            SliverToBoxAdapter(
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: Container(
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.search, color: Colors.grey.shade400),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Rechercher un lieu...',
-                          style: TextStyle(
-                            color: Colors.grey.shade500,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                      Icon(Icons.tune, color: Colors.grey.shade400),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            // SliverToBoxAdapter(
+            //   child: SlideTransition(
+            //     position: _slideAnimation,
+            //     child: Container(
+            //       margin: const EdgeInsets.all(16),
+            //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            //       decoration: BoxDecoration(
+            //         color: Colors.white,
+            //         borderRadius: BorderRadius.circular(16),
+            //         boxShadow: [
+            //           BoxShadow(
+            //             color: Colors.black.withOpacity(0.1),
+            //             blurRadius: 10,
+            //             offset: const Offset(0, 2),
+            //           ),
+            //         ],
+            //       ),
+            //       child: Row(
+            //         children: [
+            //           Icon(Icons.search, color: Colors.grey.shade400),
+            //           const SizedBox(width: 12),
+            //           Expanded(
+            //             child: Text(
+            //               'Rechercher un lieu...',
+            //               style: TextStyle(
+            //                 color: Colors.grey.shade500,
+            //                 fontSize: 16,
+            //               ),
+            //             ),
+            //           ),
+            //           Icon(Icons.tune, color: Colors.grey.shade400),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
             
             // Content
             SliverToBoxAdapter(
