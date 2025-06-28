@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class DashboardGuide extends StatefulWidget {
-  const DashboardGuide({super.key});
+class ManageToursScreen extends StatefulWidget {
+  const ManageToursScreen({super.key});
 
   @override
-  State<DashboardGuide> createState() => _DashboardGuideState();
+  State<ManageToursScreen> createState() => _ManageToursScreenState();
 }
 
-class _DashboardGuideState extends State<DashboardGuide>
+class _ManageToursScreenState extends State<ManageToursScreen>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -69,18 +69,24 @@ class _DashboardGuideState extends State<DashboardGuide>
           .order('created_at', ascending: false);
 
       final List<Map<String, dynamic>> typedResponse =
-          (response as List).cast<Map<dynamic, dynamic>>().map<Map<String, dynamic>>((item) {
-        return item.cast<String, dynamic>();
-      }).toList();
+          (response as List)
+              .cast<Map<dynamic, dynamic>>()
+              .map<Map<String, dynamic>>((item) {
+                return item.cast<String, dynamic>();
+              })
+              .toList();
 
       final processedBookings = await Future.wait(
         typedResponse.map((booking) async {
-          final clientData = (booking['client'] as Map?)?.cast<String, dynamic>() ?? {};
-          final profileData = (booking['profile'] as Map?)?.cast<String, dynamic>() ?? {};
+          final clientData =
+              (booking['client'] as Map?)?.cast<String, dynamic>() ?? {};
+          final profileData =
+              (booking['profile'] as Map?)?.cast<String, dynamic>() ?? {};
 
           String imageUrl = '';
           final dynamicImageUrl = profileData['image_url'];
-          if (dynamicImageUrl != null && dynamicImageUrl.toString().isNotEmpty) {
+          if (dynamicImageUrl != null &&
+              dynamicImageUrl.toString().isNotEmpty) {
             try {
               imageUrl = _supabase.storage
                   .from('profile-images')
@@ -94,7 +100,8 @@ class _DashboardGuideState extends State<DashboardGuide>
             ...booking,
             'client': {
               ...clientData,
-              'phone_number': profileData['phone_number'] ??
+              'phone_number':
+                  profileData['phone_number'] ??
                   clientData['phone_number'] ??
                   'No phone',
               'image_url': imageUrl,
@@ -120,129 +127,147 @@ class _DashboardGuideState extends State<DashboardGuide>
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Modal handle
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+      builder:
+          (context) => Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Contact ${clientData['name'] ?? 'Client'}', 
-              style: const TextStyle(
-                fontSize: 18, 
-                fontWeight: FontWeight.bold
-              ),
-            ),
-            const SizedBox(height: 20),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Modal handle
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Contact ${clientData['name'] ?? 'Client'}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
 
-            if (clientData['phone_number'] != null && 
-                clientData['phone_number'].toString().isNotEmpty &&
-                clientData['phone_number'] != 'No phone') ...[
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.phone, color: Colors.green),
-                ),
-                title: const Text('Call'),
-                subtitle: Text(clientData['phone_number']),
-                onTap: () {
-                  Navigator.pop(context);
-                  _makePhoneCall(clientData['phone_number']);
-                },
-              ),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.message, color: Colors.blue),
-                ),
-                title: const Text('Send SMS'),
-                subtitle: Text(clientData['phone_number']),
-                onTap: () {
-                  Navigator.pop(context);
-                  _sendSMS(clientData['phone_number']);
-                },
-              ),
-            ] else ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.warning_amber, color: Colors.orange),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        'No phone number available for this client',
-                        style: TextStyle(fontSize: 14),
+                if (clientData['phone_number'] != null &&
+                    clientData['phone_number'].toString().isNotEmpty &&
+                    clientData['phone_number'] != 'No phone') ...[
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
                       ),
+                      child: const Icon(Icons.phone, color: Colors.green),
                     ),
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
+                    title: const Text('Call'),
+                    subtitle: Text(clientData['phone_number']),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _makePhoneCall(clientData['phone_number']);
+                    },
+                  ),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.message, color: Colors.blue),
+                    ),
+                    title: const Text('Send SMS'),
+                    subtitle: Text(clientData['phone_number']),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _sendSMS(clientData['phone_number']);
+                    },
+                  ),
+                ] else ...[
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.warning_amber, color: Colors.orange),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text(
+                            'No phone number available for this client',
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
     );
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
     final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
-    if (await canLaunchUrl(launchUri)) {
+    try {
       await launchUrl(launchUri);
-    } else {
-      _showSnackBar('Could not launch $phoneNumber', Colors.red);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not launch phone call: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _sendSMS(String phoneNumber) async {
     final Uri launchUri = Uri(scheme: 'sms', path: phoneNumber);
-    if (await canLaunchUrl(launchUri)) {
+    try {
       await launchUrl(launchUri);
-    } else {
-      _showSnackBar('Could not launch SMS to $phoneNumber', Colors.red);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not launch SMS: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _acceptBooking(String bookingId) async {
     try {
       setState(() {
-        _bookingRequests.removeWhere((booking) => booking['id'].toString() == bookingId);
+        _bookingRequests.removeWhere(
+          (booking) => booking['id'].toString() == bookingId,
+        );
       });
 
-      final response = await _supabase
-          .from('bookingGuid')
-          .update({'state': 'accepted'})
-          .eq('id', bookingId)
-          .select();
+      final response =
+          await _supabase
+              .from('bookingGuid')
+              .update({'state': 'accepted'})
+              .eq('id', bookingId)
+              .select();
 
       if (response == null || response.isEmpty) {
         await _fetchBookingRequests();
@@ -259,14 +284,17 @@ class _DashboardGuideState extends State<DashboardGuide>
   Future<void> _cancelBooking(String bookingId) async {
     try {
       setState(() {
-        _bookingRequests.removeWhere((booking) => booking['id'].toString() == bookingId);
+        _bookingRequests.removeWhere(
+          (booking) => booking['id'].toString() == bookingId,
+        );
       });
 
-      final response = await _supabase
-          .from('bookingGuid')
-          .update({'state': 'canceled'})
-          .eq('id', bookingId)
-          .select();
+      final response =
+          await _supabase
+              .from('bookingGuid')
+              .update({'state': 'canceled'})
+              .eq('id', bookingId)
+              .select();
 
       if (response == null || response.isEmpty) {
         await _fetchBookingRequests();
@@ -342,33 +370,34 @@ class _DashboardGuideState extends State<DashboardGuide>
             ),
         ],
       ),
-      body: _isLoading
-          ? _buildLoadingState()
-          : _hasError
+      body:
+          _isLoading
+              ? _buildLoadingState()
+              : _hasError
               ? _buildErrorState()
               : _bookingRequests.isEmpty
-                  ? _buildEmptyState()
-                  : FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: SlideTransition(
-                        position: _slideAnimation,
-                        child: RefreshIndicator(
-                          onRefresh: _fetchBookingRequests,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.all(20),
-                            itemCount: _bookingRequests.length,
-                            itemBuilder: (context, index) {
-                              final booking = _bookingRequests[index];
-                              return AnimatedContainer(
-                                duration: Duration(milliseconds: 300 + (index * 100)),
-                                curve: Curves.easeOutBack,
-                                child: _buildBookingCard(booking, index),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
+              ? _buildEmptyState()
+              : FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: RefreshIndicator(
+                    onRefresh: _fetchBookingRequests,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(20),
+                      itemCount: _bookingRequests.length,
+                      itemBuilder: (context, index) {
+                        final booking = _bookingRequests[index];
+                        return AnimatedContainer(
+                          duration: Duration(milliseconds: 300 + (index * 100)),
+                          curve: Curves.easeOutBack,
+                          child: _buildBookingCard(booking, index),
+                        );
+                      },
                     ),
+                  ),
+                ),
+              ),
     );
   }
 
@@ -452,7 +481,8 @@ class _DashboardGuideState extends State<DashboardGuide>
   }
 
   Widget _buildBookingCard(Map<String, dynamic> booking, int index) {
-    final clientData = (booking['client'] as Map?)?.cast<String, dynamic>() ?? {};
+    final clientData =
+        (booking['client'] as Map?)?.cast<String, dynamic>() ?? {};
     final status = booking['state'] ?? 'en_cour';
     final isAccepted = status == 'accepted';
     final isCanceled = status == 'canceled';
@@ -473,9 +503,10 @@ class _DashboardGuideState extends State<DashboardGuide>
                 offset: const Offset(0, 4),
               ),
             ],
-            border: isAccepted
-                ? Border.all(color: Colors.green.withOpacity(0.3), width: 2)
-                : isCanceled
+            border:
+                isAccepted
+                    ? Border.all(color: Colors.green.withOpacity(0.3), width: 2)
+                    : isCanceled
                     ? Border.all(color: Colors.red.withOpacity(0.3), width: 2)
                     : null,
           ),
@@ -562,9 +593,10 @@ class _DashboardGuideState extends State<DashboardGuide>
     Map<String, dynamic> booking,
     Map<String, dynamic> clientData,
   ) {
-    final profileImageUrl = clientData['image_url']?.isNotEmpty == true
-        ? clientData['image_url']
-        : 'https://ui-avatars.com/api/?name=${clientData['name']?.substring(0, 1) ?? 'C'}&background=random';
+    final profileImageUrl =
+        clientData['image_url']?.isNotEmpty == true
+            ? clientData['image_url']
+            : 'https://ui-avatars.com/api/?name=${clientData['name']?.substring(0, 1) ?? 'C'}&background=random';
 
     return Row(
       children: [
@@ -591,12 +623,13 @@ class _DashboardGuideState extends State<DashboardGuide>
               onBackgroundImageError: (exception, stackTrace) {
                 debugPrint('Failed to load profile image: $exception');
               },
-              child: profileImageUrl.contains('ui-avatars.com')
-                  ? Text(
-                      clientData['name']?.substring(0, 1) ?? 'C',
-                      style: const TextStyle(fontSize: 24),
-                    )
-                  : null,
+              child:
+                  profileImageUrl.contains('ui-avatars.com')
+                      ? Text(
+                        clientData['name']?.substring(0, 1) ?? 'C',
+                        style: const TextStyle(fontSize: 24),
+                      )
+                      : null,
             ),
           ),
         ),
