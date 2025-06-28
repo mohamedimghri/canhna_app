@@ -299,30 +299,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: const Text("Log Out", style: TextStyle(color: Colors.black)),
-          content: const Text("Are you sure you want to log out?", 
-              style: TextStyle(color: Colors.grey)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel", style: TextStyle(color: Colors.black)),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                await _logout();
-              },
-              child: const Text("Log Out", style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        );
-      },
-    );
-  }
+ 
 }
