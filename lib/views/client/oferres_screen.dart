@@ -68,7 +68,7 @@ class _OffresScreenState extends State<OffresScreen>
   final response = await supabase
       .from('offres')
       .select()
-      .eq('type', 'standard');
+      .eq('type', 'standar');
 
   return (response as List).map((e) => Offre.fromJson(e)).toList();
 }
