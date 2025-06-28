@@ -65,9 +65,14 @@ class _OffresScreenState extends State<OffresScreen>
   }
 
   Future<List<Offre>> fetchOffres() async {
-    final response = await supabase.from('offres').select();
-    return (response as List).map((e) => Offre.fromJson(e)).toList();
-  }
+  final response = await supabase
+      .from('offres')
+      .select()
+      .eq('type', 'standard');
+
+  return (response as List).map((e) => Offre.fromJson(e)).toList();
+}
+
 
   Future<void> handlePurchase(Offre offre) async {
     final userId = Supabase.instance.client.auth.currentUser?.id;

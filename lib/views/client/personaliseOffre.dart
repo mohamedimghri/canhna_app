@@ -152,6 +152,7 @@ Future<void> _saveOffer() async {
       'hotel': _hasHotel,
       'transport': _hasTransport,
       'place': _hasPlace,
+      'type' :'personalise',
     };
 
     String? offreId;
