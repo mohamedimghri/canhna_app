@@ -168,6 +168,7 @@ class _OffresScreenState extends State<OffresScreen> with TickerProviderStateMix
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusL)),
           elevation: 24,
           title: Row(
