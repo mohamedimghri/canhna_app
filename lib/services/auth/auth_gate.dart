@@ -1,4 +1,5 @@
 import 'package:canhna_app/views/admin/dashboard_admin.dart';
+import 'package:canhna_app/views/auth/Register_screen.dart';
 import 'package:canhna_app/views/auth/login_screen.dart';
 import 'package:canhna_app/views/client/oferres_screen.dart';
 

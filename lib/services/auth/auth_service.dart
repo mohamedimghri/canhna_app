@@ -19,6 +19,7 @@ class AuthService {
     String email,
     String password,
     String name,
+    String telefone,
     String role,
   ) async {
     final response = await _supabase.auth.signUp(
@@ -34,6 +35,7 @@ class AuthService {
         await _supabase.from('profiles').insert({
           'id': user.id,
           'name': name,
+          'phone_number' : telefone,
           'role': role,
           'is_active': true
         });
