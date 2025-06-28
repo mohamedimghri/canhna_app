@@ -87,7 +87,15 @@ class _ClientsScreenState extends State<ClientsScreen> {
           .order('name', ascending: true);
       
       final data = response as List<dynamic>;
-      final clients = data.map((json) => Profile.fromJson(json)).toList();
+      final clients = data.map((json) {
+        // Convert image path to public URL if it exists
+        if (json['image_url'] != null && json['image_url'].isNotEmpty) {
+          json['image_url'] = supabase.storage
+              .from('profile-images')
+              .getPublicUrl(json['image_url']);
+        }
+        return Profile.fromJson(json);
+      }).toList();
       
       // Initialize the purchases map
       Map<String, List<Purchase>> clientPurchases = {};
