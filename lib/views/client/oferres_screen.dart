@@ -387,7 +387,7 @@ class _OffresScreenState extends State<OffresScreen>
         return Transform.scale(
           scale: 0.8 + (0.2 * value),
           child: Opacity(
-            opacity: value,
+            opacity: 1.0,
             child: Container(
               margin: const EdgeInsets.only(bottom: 20),
               child: Hero(
