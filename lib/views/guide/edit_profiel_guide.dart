@@ -16,8 +16,6 @@ class _EditProfielGuideState extends State<EditProfielGuide> {
   final TextEditingController _currentPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  final TextEditingController _bioController = TextEditingController();
-  final TextEditingController _specialtiesController = TextEditingController();
 
   final _supabase = Supabase.instance.client;
   final String _bucketName = 'profile-images';
@@ -40,8 +38,6 @@ class _EditProfielGuideState extends State<EditProfielGuide> {
     _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
-    _bioController.dispose();
-    _specialtiesController.dispose();
     super.dispose();
   }
 
@@ -52,7 +48,7 @@ class _EditProfielGuideState extends State<EditProfielGuide> {
     try {
       final response = await _supabase
           .from('profiles')
-          .select('image_url, bio, specialties')
+          .select('image_url')
           .eq('id', user.id)
           .single();
 
@@ -67,8 +63,6 @@ class _EditProfielGuideState extends State<EditProfielGuide> {
               .from(_bucketName)
               .getPublicUrl(cleanPath);
         }
-        _bioController.text = response['bio'] ?? '';
-        _specialtiesController.text = response['specialties'] ?? '';
       });
     } catch (e) {
       print('Error loading profile: $e');
@@ -123,16 +117,12 @@ class _EditProfielGuideState extends State<EditProfielGuide> {
       // Upload new image if selected
       String? imagePath = await _uploadImage();
       
-      // Update profile with new data
-      final updates = {
-        if (imagePath != null) 'image_url': imagePath,
-        'bio': _bioController.text,
-        'specialties': _specialtiesController.text,
-      };
-
-      await _supabase.from('profiles')
-        .update(updates)
-        .eq('id', user.id);
+      // Update profile with new image if changed
+      if (imagePath != null) {
+        await _supabase.from('profiles')
+          .update({'image_url': imagePath})
+          .eq('id', user.id);
+      }
 
       // Update password if fields are filled
       if (_newPasswordController.text.isNotEmpty) {
@@ -249,73 +239,6 @@ class _EditProfielGuideState extends State<EditProfielGuide> {
                       ),
                     ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // Guide Information Section
-              const Padding(
-                padding: EdgeInsets.only(left: 8, bottom: 12),
-                child: Text(
-                  'GUIDE INFORMATION',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                  border: Border.all(color: Colors.grey[200]!),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _bioController,
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        labelText: 'Bio',
-                        labelStyle: const TextStyle(color: Colors.grey),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _specialtiesController,
-                      decoration: InputDecoration(
-                        labelText: 'Specialties',
-                        labelStyle: const TextStyle(color: Colors.grey),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        hintText: 'Hiking, History, Local Cuisine...',
-                      ),
-                    ),
-                  ],
                 ),
               ),
               const SizedBox(height: 30),
