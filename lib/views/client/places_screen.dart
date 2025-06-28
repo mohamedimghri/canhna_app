@@ -886,4 +886,297 @@ class PlaceDetailSheet extends StatelessWidget {
       ),
     );
   }
+
+  void _showPlaceDetails(Map<String, dynamic> place, bool isDark, Color primaryColor) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? Colors.grey[900] : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.9,
+          maxChildSize: 0.95,
+          builder: (_, controller) {
+            return SingleChildScrollView(
+              controller: controller,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[400],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        '${place['image']}?auto=format&fit=crop&w=800&q=80',
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _getLocalizedName(place),
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.white : const Color(0xFF15161E)),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            place['isFavorite'] ? Icons.favorite : Icons.favorite_border,
+                            color: place['isFavorite'] ? Colors.red : primaryColor,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              place['isFavorite'] = !place['isFavorite'];
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          size: 16,
+                          color: primaryColor,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          place['location'],
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: isDark ? Colors.grey[400] : const Color(0xFF606A85)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    RatingBarIndicator(
+                      rating: place['rating'],
+                      itemBuilder: (context, index) => const Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                      ),
+                      itemCount: 5,
+                      itemSize: 20,
+                      direction: Axis.horizontal,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      _getLocalizedDescription(place),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isDark ? Colors.grey[400] : const Color(0xFF606A85)),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildDetailRow(
+                      Icons.access_time,
+                      _getLocalizedText('Opening Hours', 'ساعات العمل', 'Heures d\'ouverture'),
+                      place['opening_hours'],
+                      isDark,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildDetailRow(
+                      Icons.monetization_on,
+                      _getLocalizedText('Entry Fee', 'رسوم الدخول', 'Frais d\'entrée'),
+                      place['entry_fee'],
+                      isDark,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildDetailRow(
+                      Icons.category,
+                      _getLocalizedText('Category', 'الفئة', 'Catégorie'),
+                      place['category'],
+                      isDark,
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Implement navigation or booking functionality
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: Text(
+                          _getLocalizedText('Get Directions', 'احصل على الاتجاهات', 'Obtenir des directions'),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String title, String value, bool isDark) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: isDark ? Colors.grey[400] : const Color(0xFF606A85)),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : const Color(0xFF15161E)),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                color: isDark ? Colors.grey[400] : const Color(0xFF606A85)),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _changeLanguage() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(_getLocalizedText('Select Language', 'اختر اللغة', 'Choisir la langue')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('English'),
+                trailing: _selectedLanguage == 'English' ? const Icon(Icons.check) : null,
+                onTap: () {
+                  setState(() {
+                    _selectedLanguage = 'English';
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('العربية'),
+                trailing: _selectedLanguage == 'Arabic' ? const Icon(Icons.check) : null,
+                onTap: () {
+                  setState(() {
+                    _selectedLanguage = 'Arabic';
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('Français'),
+                trailing: _selectedLanguage == 'French' ? const Icon(Icons.check) : null,
+                onTap: () {
+                  setState(() {
+                    _selectedLanguage = 'French';
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Helper methods for localization
+  String _getLocalizedText(String english, String arabic, String french) {
+    switch (_selectedLanguage) {
+      case 'Arabic':
+        return arabic;
+      case 'French':
+        return french;
+      default:
+        return english;
+    }
+  }
+
+  String _getLocalizedCategory(String category) {
+    if (_selectedLanguage == 'Arabic') {
+      switch (category) {
+        case 'Stadiums': return 'ملاعب';
+        case 'Historical': return 'تاريخي';
+        case 'Cultural': return 'ثقافي';
+        case 'Restaurants': return 'مطاعم';
+        case 'Shopping': return 'تسوق';
+        default: return 'الكل';
+      }
+    } else if (_selectedLanguage == 'French') {
+      switch (category) {
+        case 'Stadiums': return 'Stades';
+        case 'Historical': return 'Historique';
+        case 'Cultural': return 'Culturel';
+        case 'Restaurants': return 'Restaurants';
+        case 'Shopping': return 'Shopping';
+        default: return 'Tous';
+      }
+    }
+    return category;
+  }
+
+  String _getLocalizedName(Map<String, dynamic> place) {
+    switch (_selectedLanguage) {
+      case 'Arabic':
+        return place['name_ar'];
+      case 'French':
+        return place['name_fr'];
+      default:
+        return place['name'];
+    }
+  }
+
+  String _getLocalizedDescription(Map<String, dynamic> place) {
+    switch (_selectedLanguage) {
+      case 'Arabic':
+        return place['description_ar'];
+      case 'French':
+        return place['description_fr'];
+      default:
+        return place['description'];
+    }
+  }
 }
